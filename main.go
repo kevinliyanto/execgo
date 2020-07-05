@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
@@ -21,11 +22,11 @@ func init() {
 }
 
 func main() {
-	if len(os.Args) < 2 {
-		fmt.Println("Usage: ", os.Args[0], "<FILE>")
+	if len(os.Args) < 3 {
+		fmt.Println("Usage: ", os.Args[0], "<directory> <code>")
 		return
 	}
-	file := os.Args[1]
+	file := os.Args[2]
 	re, _ := regexp.Compile(`^(\w+)\.(\w+)$`)
 	fi := re.FindAllStringSubmatch(file, -1)
 
@@ -48,29 +49,72 @@ func main() {
 			buf := new(bytes.Buffer)
 			buf.ReadFrom(stdout)
 			execPath = strings.TrimSuffix(buf.String(), "\n")
-			fmt.Println(execPath)
 		} else {
 			fmt.Println("Filetype is not supported")
 			return
 		}
 
-		newArgs := append([]string{file}, os.Args[2:]...)
-		filecmd := exec.Command(execPath, newArgs...)
-		// Pipe in from input file
-		filecmd.Stdin = os.Stdin
-		//
-		filecmd.Stdout = os.Stdout
-		filecmd.Stderr = os.Stderr
-
-		output, err := filecmd.Output()
+		// Get input/output file
+		config, err := ReadConfig()
 		if err != nil {
 			log.Fatal(err)
+			os.Exit(1)
 		}
 
-		if err := filecmd.Run(); err != nil {
+		if _, err := os.Stat(os.Args[1]); os.IsNotExist(err) {
 			log.Fatal(err)
+			os.Exit(1)
 		}
 
-		fmt.Printf("Output: %s", output)
+		input, output := GeneratePath(config, os.Args[1])
+
+		newArgs := append([]string{file}, os.Args[3:]...)
+		filecmd := exec.Command(execPath, newArgs...)
+
+		// Open input file and stream it to the exec's stdin
+		inputFile, err := os.Open(input)
+		if err != nil {
+			log.Fatal(err)
+			os.Exit(1)
+		}
+		defer inputFile.Close()
+
+		filecmd.Stdin = inputFile
+		filecmd.Stderr = os.Stderr
+
+		originalOutput, err := filecmd.StdoutPipe()
+		if err != nil {
+			log.Fatal(err)
+			os.Exit(1)
+		}
+
+		if err := filecmd.Start(); err != nil {
+			log.Fatal(err)
+			os.Exit(1)
+		}
+
+		buf := new(bytes.Buffer)
+		buf.ReadFrom(originalOutput)
+
+		if err = filecmd.Wait(); err != nil {
+			log.Fatal(err)
+			os.Exit(1)
+		}
+
+		programOutput := buf.String()
+
+		outputFile, err := ioutil.ReadFile(output)
+		if err != nil {
+			log.Fatal(err)
+			os.Exit(1)
+		}
+
+		outputText := string(outputFile)
+
+		if equal, diff := Diff(outputText, programOutput); equal {
+			fmt.Println("Output is right")
+		} else {
+			fmt.Printf("Output is wrong. Difference: %s\n", diff)
+		}
 	}
 }

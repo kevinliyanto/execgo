@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"os"
+	"path"
 )
 
 // Configuration for expected input file
@@ -23,4 +24,9 @@ func ReadConfig() (*Configuration, error) {
 		return nil, err
 	}
 	return config, nil
+}
+
+// GeneratePath generates path from the given directory with the config specified
+func GeneratePath(config *Configuration, dir string) (string, string) {
+	return path.Join(dir, config.Input), path.Join(dir, config.Output)
 }
