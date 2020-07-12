@@ -40,7 +40,7 @@ func main() {
 
 	var execPath string = ""
 
-	if len(fi[0]) != 3 {
+	if len(fi) < 1 || len(fi[0]) != 3 {
 		// File is an executable
 		// Use empty execPath
 	} else {
@@ -81,11 +81,16 @@ func main() {
 
 	var newArgs []string
 
+	workdir, err := os.Getwd()
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	if execPath == "" {
-		execPath = file
+		execPath = filepath.Join(workdir, file)
 		newArgs = os.Args[3:]
 	} else {
-		newArgs = append([]string{file}, os.Args[3:]...)
+		newArgs = append([]string{filepath.Join(workdir, file)}, os.Args[3:]...)
 	}
 
 	filecmd := exec.Command(execPath, newArgs...)
