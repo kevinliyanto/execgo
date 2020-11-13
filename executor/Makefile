@@ -1,5 +1,5 @@
 build:
-	go build -o test
+	go build -o autotest
 
 all:
 	build

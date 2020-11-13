@@ -15,8 +15,9 @@ import (
 
 // Configuration for expected input file
 type Configuration struct {
-	Input  string
-	Output string
+	Input     string `json:"input"`
+	Output    string `json:"output"`
+	Directory string `json:"directory"`
 }
 
 var executablesMap map[string]string

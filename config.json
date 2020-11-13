@@ -1,4 +1,5 @@
 {
-  "Input": "input",
-  "Output": "output"
+  "directory": "answer",
+  "input": "input",
+  "output": "output"
 }
