@@ -35,6 +35,18 @@ Make sure that these are available (check by using `which`):
 - clean (clean all executable files)
 - generator (only generates `./generator`)
 
+## Test executable
+
+Command to run:
+
+```sh
+./test <directory-path> <file>
+
+# Note:
+# File can be either interpreted (*.py, *.js, or *.pl) or compiled executable
+# You need to specify the path for the compiled executable (add "./" for file in current dir), otherwise error will be thrown.
+```
+
 ## Config.json file
 
 This config.json file indicates where the test input and expected output file of a directory that will be specified on `./test`.

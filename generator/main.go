@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
@@ -76,11 +77,23 @@ func main() {
 
 	// filecmd := exec.Command(execPath, newArgs...)
 
+	// Use exec on the file
+	fmt.Println(newArgs)
+
+	// Read all from stdin. Will stop on EOF
+	stdinData, err := ioutil.ReadAll(os.Stdin)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Pipe stdinData to exec
+	// Read exec's stdout to a reader
+	bytes.NewReader(stdinData)
+
 	// Make directory based on path
 	fmt.Println(dirPath)
 
-	// Use exec on the file
-	fmt.Println(newArgs)
+	// Copy input data to file
 }
 
 // ReadConfig get read configuration input and output filename

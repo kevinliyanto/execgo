@@ -60,8 +60,7 @@ func main() {
 			buf.ReadFrom(stdout)
 			execPath = strings.TrimSuffix(buf.String(), "\n")
 		} else {
-			fmt.Println("Filetype is not supported")
-			return
+			log.Fatalln("Filetype is not supported")
 		}
 	}
 
@@ -69,12 +68,10 @@ func main() {
 	config, err := ReadConfig()
 	if err != nil {
 		log.Fatal(err)
-		os.Exit(1)
 	}
 
 	if _, err := os.Stat(os.Args[1]); os.IsNotExist(err) {
 		log.Fatal(err)
-		os.Exit(1)
 	}
 
 	input, output := GeneratePath(config, os.Args[1])
@@ -99,7 +96,6 @@ func main() {
 	inputFile, err := os.Open(input)
 	if err != nil {
 		log.Fatal(err)
-		os.Exit(1)
 	}
 	defer inputFile.Close()
 
@@ -109,12 +105,10 @@ func main() {
 	originalOutput, err := filecmd.StdoutPipe()
 	if err != nil {
 		log.Fatal(err)
-		os.Exit(1)
 	}
 
 	if err := filecmd.Start(); err != nil {
 		log.Fatal(err)
-		os.Exit(1)
 	}
 
 	buf := new(bytes.Buffer)
@@ -122,7 +116,6 @@ func main() {
 
 	if err = filecmd.Wait(); err != nil {
 		log.Fatal(err)
-		os.Exit(1)
 	}
 
 	programOutput := buf.String()
@@ -130,7 +123,6 @@ func main() {
 	outputFile, err := ioutil.ReadFile(output)
 	if err != nil {
 		log.Fatal(err)
-		os.Exit(1)
 	}
 
 	outputText := string(outputFile)
@@ -144,12 +136,16 @@ func main() {
 
 // ReadConfig get read configuration input and output filename
 func ReadConfig() (*Configuration, error) {
-	file, _ := os.Open("config.json")
+	file, err := os.Open("config.json")
+	if err != nil {
+		return nil, err
+	}
+
 	defer file.Close()
 
 	decoder := json.NewDecoder(file)
 	config := &Configuration{}
-	err := decoder.Decode(config)
+	err = decoder.Decode(config)
 	if err != nil {
 		return nil, err
 	}
