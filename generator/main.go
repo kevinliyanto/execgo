@@ -9,6 +9,7 @@ import (
 	"os"
 	"os/exec"
 	"path"
+	"path/filepath"
 	"regexp"
 	"strings"
 )
@@ -66,6 +67,12 @@ func main() {
 		}
 	}
 
+	// Get input/output file
+	config, err := ReadConfig()
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	var newArgs []string
 
 	if execPath == "" {
@@ -109,24 +116,35 @@ func main() {
 	// Pipe stdin to the Cmd, and read stdout of the Cmd to buf
 	fWriteCloser.Write(stdinData)
 
-	buf := new(bytes.Buffer)
-	buf.ReadFrom(fReadCloser)
+	stdoutDataBuf := new(bytes.Buffer)
+	stdoutDataBuf.ReadFrom(fReadCloser)
 
 	if err = filecmd.Wait(); err != nil {
 		log.Fatal(err)
 	}
 
-	fmt.Println(buf.String())
+	fmt.Println(stdoutDataBuf.String())
 
-	// TODO
 	// Make directory (recursively) based on path
-	// If it is not an absolute path, use current path as base path
-	// Else, use absolute path
-	fmt.Println(dirPath)
+	if err = os.MkdirAll(dirPath, os.ModePerm); err != nil {
+		log.Fatal(err)
+	}
+
+	inputPath := filepath.Join(dirPath, config.Input)
+	outputPath := filepath.Join(dirPath, config.Output)
 
 	// TODO
 	// Copy input and output data to file into the specified path
 
+	// Write input
+	if err = ioutil.WriteFile(inputPath, stdinData, os.ModePerm); err != nil {
+		log.Fatal(err)
+	}
+
+	// Write output
+	if err = ioutil.WriteFile(outputPath, stdoutDataBuf.Bytes(), os.ModePerm); err != nil {
+		log.Fatal(err)
+	}
 }
 
 // ReadConfig get read configuration input and output filename
