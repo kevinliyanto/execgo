@@ -7,6 +7,8 @@ $preset = shift @ARGV;
 if (!$preset) {
   printf "no preset given. compile executor\n";
   system "cd executor && make && mv autotest ../autotest";
+} elsif ($preset eq '--help') {
+  printf "Arguments: clean, all, generator\n";
 } elsif ($preset eq 'clean') {
   printf "cleaning all executables\n";
   my @exec = qw( test generate );

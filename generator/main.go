@@ -75,7 +75,7 @@ func main() {
 		newArgs = append([]string{file}, os.Args[3:]...)
 	}
 
-	// filecmd := exec.Command(execPath, newArgs...)
+	filecmd := exec.Command(execPath, newArgs...)
 
 	// Use exec on the file
 	fmt.Println(newArgs)
@@ -88,12 +88,45 @@ func main() {
 
 	// Pipe stdinData to exec
 	// Read exec's stdout to a reader
-	bytes.NewReader(stdinData)
+	// Then take stdout to something called output
 
-	// Make directory based on path
+	// Open up WriteCloser and ReadCloser pipe to write and read from the exec'd command (Cmd)
+	fWriteCloser, err := filecmd.StdinPipe()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fReadCloser, err := filecmd.StdoutPipe()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Start the Cmd
+	if err := filecmd.Start(); err != nil {
+		log.Fatal(err)
+	}
+
+	// Pipe stdin to the Cmd, and read stdout of the Cmd to buf
+	fWriteCloser.Write(stdinData)
+
+	buf := new(bytes.Buffer)
+	buf.ReadFrom(fReadCloser)
+
+	if err = filecmd.Wait(); err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println(buf.String())
+
+	// TODO
+	// Make directory (recursively) based on path
+	// If it is not an absolute path, use current path as base path
+	// Else, use absolute path
 	fmt.Println(dirPath)
 
-	// Copy input data to file
+	// TODO
+	// Copy input and output data to file into the specified path
+
 }
 
 // ReadConfig get read configuration input and output filename
