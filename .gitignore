@@ -1,0 +1,7 @@
+# Go vendor
+vendor/
+
+# Any interpreted files
+*.py
+*.pl
+*.js
