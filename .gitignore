@@ -1,0 +1,13 @@
+# Output
+output
+
+# Go vendor
+vendor/
+
+# Any interpreted files
+*.py
+*.pl
+*.js
+
+# Test suites
+test*
