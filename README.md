@@ -24,33 +24,16 @@ Make sure that these are available (check by using `which`):
 - node
 - perl
 
-## Generate test executable
+## Generate executable
 
-1. `chmod u+x script.pl`
-2. `./script.pl <command>`
-   Optional commands are:
+1. `make`
+2. `./output <test|generate> <file> [ --options="values" ]`
 
-- (no command: generates `./autotest`)
-- all (generates `./generator` alongside `./autotest`)
-- clean (clean all executable files)
-- generator (only generates `./generator`)
-
-## Test executable
-
-Command to run:
-
-```sh
-./autotest <directory-path> <file>
-
-# Note:
-# File can be either interpreted (*.py, *.js, or *.pl) or compiled executable
-# You need to specify the path for the compiled executable (add "./" for file in current dir), otherwise error will be thrown.
-```
-
-## Config.json file
-
-This config.json file indicates where the test input and expected output file of a directory that will be specified on `./autotest`. If the input / output test directory is custom, set it on "directory" parameter on config.
-
-### Todos
-
-- Implement diff on `executor/diff.go`
+| Required | Default         | Option (angled bracket not required)         | Description                                                                   |
+| -------- | --------------- | -------------------------------------------- | ----------------------------------------------------------------------------- |
+| Yes      | N/A             | First parameter (test or generate            | Generate input/output file or compare runnable to input/output file reference |
+| Yes      | N/A             | Second parameter (file)                      | File that you're going to run. Can be interpreted file or direct executable   |
+| No       | "" (empty)      | `-a="<arguments>"` or `--args="<arguments>"` | Arguments supplied to the runnable                                            |
+| No       | "file_solution" | `-p="<path>"` or `--path="<path>"`           | Custom path which points to directory which stores input and output file      |
+| No       | "input"         | `-i="<filename>"` or `--input="<filename>"`  | Input file reference name                                                     |
+| No       | "output"        | `-o="<filename>"` or `--output="<filename>"` | Output file reference name                                                    |
