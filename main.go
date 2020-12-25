@@ -143,10 +143,6 @@ func main() {
 		outputFile = "output"
 	}
 
-	fmt.Println(optPath)
-	fmt.Println(execPath)
-	fmt.Println(cmd)
-
 	config := &Configuration{
 		exec:       cmd,
 		optPath:    optPath,
@@ -159,6 +155,7 @@ func main() {
 		// Call test with the params
 		Test(config)
 	case 1:
+		// Call generator with params
 		Generate(config)
 	}
 }

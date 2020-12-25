@@ -2,7 +2,6 @@ package main
 
 import (
 	"bytes"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
@@ -35,22 +34,29 @@ func Generate(config *Configuration) {
 		log.Fatal(err)
 	}
 
+	// Create data buffer for exec's stdout
+	stdoutDataBuf := new(bytes.Buffer)
+
 	// Start the Cmd
-	if err := filecmd.Start(); err != nil {
+	if err = filecmd.Start(); err != nil {
 		log.Fatal(err)
 	}
 
-	// Pipe stdin to the Cmd, and read stdout of the Cmd to buf
-	fWriteCloser.Write(stdinData)
+	// Pipe stdinData that is read previously to the Cmd
+	// and read stdout of the Cmd to the created buf
+	if _, err = fWriteCloser.Write(stdinData); err != nil {
+		log.Fatal(err)
+	}
+	if _, err = stdoutDataBuf.ReadFrom(fReadCloser); err != nil {
+		log.Fatal(err)
+	}
 
-	stdoutDataBuf := new(bytes.Buffer)
-	stdoutDataBuf.ReadFrom(fReadCloser)
-
+	// Wait for all to finish
 	if err = filecmd.Wait(); err != nil {
 		log.Fatal(err)
 	}
 
-	fmt.Println(stdoutDataBuf.String())
+	stdoutData := stdoutDataBuf.Bytes()
 
 	// Make directory (recursively) based on path
 	if err = os.MkdirAll(dirPath, os.ModePerm); err != nil {
@@ -60,16 +66,13 @@ func Generate(config *Configuration) {
 	inputPath := filepath.Join(dirPath, config.inputFile)
 	outputPath := filepath.Join(dirPath, config.outputFile)
 
-	// TODO
-	// Copy input and output data to file into the specified path
-
 	// Write input
 	if err = ioutil.WriteFile(inputPath, stdinData, os.ModePerm); err != nil {
 		log.Fatal(err)
 	}
 
 	// Write output
-	if err = ioutil.WriteFile(outputPath, stdoutDataBuf.Bytes(), os.ModePerm); err != nil {
+	if err = ioutil.WriteFile(outputPath, stdoutData, os.ModePerm); err != nil {
 		log.Fatal(err)
 	}
 }
