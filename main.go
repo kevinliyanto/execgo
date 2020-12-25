@@ -108,8 +108,9 @@ func main() {
 	var passedArgs string
 	getopt.FlagLong(&passedArgs, "args", 'a', "Arguments").SetOptional()
 	args := strings.Split(passedArgs, "")
+	newArgs := append([]string{file}, args...)
 
-	cmd := exec.Command(execPath, args...)
+	cmd := exec.Command(execPath, newArgs...)
 
 	// --path flag to set custom filepath for executor/generator directory
 	var optPath string
@@ -156,18 +157,8 @@ func main() {
 	switch mode {
 	case 0:
 		// Call test with the params
-		test(config)
+		Test(config)
 	case 1:
-		// Call generate with the params
+		Generate(config)
 	}
-}
-
-func test(config *Configuration) {
-	// Dummy for test
-	return
-}
-
-func generate(config *Configuration) {
-	// Dummy for configuration
-	return
 }
