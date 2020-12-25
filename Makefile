@@ -1,8 +1,8 @@
 build:
-	go build -mod vendor -o output
+	go build -mod vendor
 
 all:
 	build
 
 clean:
-	rm output
+	rm execgo
